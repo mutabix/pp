@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abayo-luc/SendIT-API.git"
+    "url": "git+"
   },
   "author": "luc",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/abayo-luc/SendIT-API/issues"
+    "url": ""
   },
-  "homepage": "https://github.com/abayo-luc/SendIT-API#readme",
+  "homepage": "",
   "dependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
