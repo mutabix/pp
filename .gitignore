@@ -1,0 +1,14 @@
+#node module
+/node_modules
+#error logs
+yarn-error.log
+npm-debug.log
+package-lock.json
+#env configuration
+.env
+
+# nyc
+.nyc_output
+
+#coverage
+coverage
