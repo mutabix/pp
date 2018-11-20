@@ -79,6 +79,14 @@ class DataModel {
   clean() {
     data[this.key].length = 0;
   }
+
+  check(){
+  }
 }
+
+// dfdfdfdf
+
+
+
 
 export default DataModel;
