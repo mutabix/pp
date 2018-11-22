@@ -1,0 +1,244 @@
+<html>
+<head>
+	<title>Google Maps JavaScript API</title>
+	<style type="text/css">
+		body{
+			padding: 0px;
+			margin: 0px;
+			font-family: sans-serif;
+		}
+		#map{
+			height: 500px;
+			width: 800px;
+			margin: 20px auto 0;
+		}
+		#traffic_btn{
+			height: 40px;
+			width: 500px;
+			margin: 20px auto 0px;
+			line-height: 40px;
+			background-color: #2C3D51;
+			color: #fff;
+			border-radius: 5px;
+			text-align: center;
+			cursor: pointer;
+		}
+		.search_place{
+			height: 50px;
+			width: 1100px;
+			margin: 50 auto 0;
+			text-align: center;
+		}
+		.place_input{
+			height: 40px;
+			width: 350px;
+			margin-left: 30px;
+			margin-right: 50px;
+		}
+		#results{
+			width: 800px;
+			margin: 30px auto 0px;
+			background-color: #efefef;
+			height: auto;
+			padding: 20px;
+		}
+		#results:empty{
+			display: none;
+		}
+		#results h3{
+			text-align: center;
+		}
+		.steps{
+			height: auto;
+			width: 95%;
+			background-color: #fff;
+			padding: 20px;
+			line-height: 25px;
+		}
+		.steps div{
+			display: none;
+		}
+	</style>
+
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7BSB-Jt2WrQiTbPoj6KUNc4LU4KmUCBU&libraries=places&callback=initMap" async defer></script>
+	<script type="text/javascript">
+
+		// Declaring global variables
+
+		var map;
+
+		var trafficLayer;
+
+		var directionsService;
+
+		var path_data = []; // Source to Destination Paths array
+
+		// Initial Rendering of the map
+
+		function initMap(){
+
+			// Initialising the direction service object
+
+			directionsService = new google.maps.DirectionsService;
+
+			map = new google.maps.Map(document.getElementById('map'),{
+				center: {lat: 26.845179,lng: 75.802219}, 
+				zoom: 4
+			});
+
+			// Enabling the google search on the input boxes
+
+			source_box = new google.maps.places.SearchBox(source);
+
+			destination_box = new google.maps.places.SearchBox(destination);
+
+		}
+
+		// Function to get traffic and path details
+
+		function get_traffic(){
+
+			// Re-rendering the map (for removing previous results)
+
+			initMap();
+
+			// Calling the route method (to get all the possible routes)
+
+			directionsService.route({
+
+				origin: source.value,
+				destination: destination.value,
+				travelMode: 'DRIVING',
+				provideRouteAlternatives: true // Provide alternate paths also
+
+			}, function(response, status) {
+
+				if (status === 'OK') {
+
+					// Running the loop for all the available paths
+
+					for (var i = 0, len = response.routes.length; i < len; i++) {
+
+						// Setting road summary, distance and duration of the path
+
+						var path_info = "Via: "+response.routes[i].summary+" ("+response.routes[i].legs[0].distance.text+")"+" in "+response.routes[i].legs[0].duration.text;
+
+						// Declaring an array to store instruction steps of each path
+
+						var path_steps = [];
+
+						for(var j = 0; j < response.routes[i].legs[0].steps.length; j++){
+
+							// Inserting each instruction step of the path 
+
+							path_steps.push(response.routes[i].legs[0].steps[j].instructions);
+
+						}
+
+						// Inserting the info of each path into path_data (global) array 
+
+						path_data.push([path_info,path_steps]);
+						
+						new google.maps.DirectionsRenderer({
+		                    map: map,
+		                    directions: response,
+		                    routeIndex: i
+		                    /*polylineOptions: new google.maps.Polyline({
+	    						strokeOpacity: 1.0,
+	    					})*/
+		                });
+
+					}
+
+
+					// Clearing off the previous data in the results displaying div
+
+					results.innerHTML = "";
+
+					// Displaying data into the results div
+
+					for(var k = 0; k < path_data.length; k++){
+
+						// Creating road name heading
+
+						var road_name = document.createElement('h3');
+						road_name.innerHTML = path_data[k][0];
+						results_show.appendChild(road_name);
+
+						// Creating instruction steps div
+
+						var road_steps = document.createElement('div');
+						road_steps.className = 'steps';
+
+						for(var n = 0; n < path_data[k][1].length; n++){
+
+							// Appending data into the instruction steps div
+
+							road_steps.innerHTML = road_steps.innerHTML + (n+1) + ". " + path_data[k][1][n] + "<br>";
+
+						}
+
+						results_show.appendChild(road_steps);
+
+					}
+
+					// Emptying the path_data array (global) for the next invokation of the get_traffic function
+
+					path_data = [];
+
+
+				} 
+				else {
+
+					// If status is not OK
+
+					window.alert('Directions request failed due to ' + status);
+
+				}
+			}); // route function callback ended
+
+			// Enabling the real time traffic layer
+
+			trafficLayer = new google.maps.TrafficLayer();
+  			trafficLayer.setMap(map);
+
+	    } // get_traffic function ended
+		
+	</script>
+</head>
+<body>
+
+	<div class="search_place">
+
+		<label for="source">Source:</label> <input type="text" class="place_input" id="source" />
+
+		<label for="destination">Destination:</label> <input type="text" class="place_input" id="destination" />
+
+	</div>
+
+	<div id="map"></div>
+
+	<div onclick="get_traffic()" id="traffic_btn">Get Traffic Details</div>
+
+	<!-- To display all the fetched path info -->
+
+	<div id="results"></div>
+
+	<script type="text/javascript">
+
+		// Declaring and initialising the DOM elements reference variables
+
+		var source = document.getElementById('source');
+
+		var source_box;
+
+		var destination = document.getElementById('destination');
+
+		var destination_box;
+
+		var results_show = document.getElementById('results');
+
+	</script>
+
+</body>
+</html>
